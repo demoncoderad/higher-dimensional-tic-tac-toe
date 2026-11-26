@@ -1,0 +1,385 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage{fontspec}
+\usepackage[english, bidi=basic, provide=*]{babel}
+\babelprovide[import, onchar=ids fonts]{english}
+\babelfont{rm}{Noto Sans}
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!65!black
+}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+
+\title{\textbf{Tic-Tac-Toe: An Intuitive Analysis of Winning Possibilities in Higher Dimensions}}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+It is a well-known fact that standard Tic-Tac-Toe is a solved game that results in a draw under optimal play. Rather than verifying this through an exhaustive game-tree search, this exposition analyses \emph{why} this is true and attempts to make the underlying reasons as intuitive as possible. Furthermore, we can expand the game along three independent axes:
+\begin{enumerate}
+    \item[(i)] the number of spatial dimensions $d$,
+    \item[(ii)] the length of the winning line $n$ needed to win, and
+    \item[(iii)] the number of players $m$.
+\end{enumerate}
+Not every argument here is a formal proof; rather, the goal is to explain the mathematical concepts driving the game. We begin with a geometric and casework-based analysis in lower dimensions and progressively move toward general combinatorial results in higher dimensions.
+
+\section{The Standard $3 \times 3$ Grid (2D, Two Players)}
+Let us begin with the simplest case: a $3 \times 3$ grid played between two players, Player $A$ (playing $\mathsf{X}$) and Player $B$ (playing $\mathsf{O}$), with $A$ moving first.
+
+\subsection{Forks and Necessary Winning Conditions}
+To understand how $B$ forces a draw, we first ask what position $A$ must reach to be assured of a win. A single $2$-in-a-row threat is never enough against an attentive opponent, because $B$ can simply block the third square. Instead, $A$ must construct a \textbf{fork}: a position with two simultaneous winning lines, each one move away from completion. Since $B$ can block at most one line on their turn, $A$ wins by placing $\mathsf{X}$ on the other line.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.44\textwidth}
+    \centering
+    \begin{tikzpicture}[scale=0.82]
+      \fill[red!10] (0,0) rectangle (1,3);
+      \fill[red!10] (0,0) rectangle (3,1);
+      \draw[thick, black!75] (0,1) -- (3,1) (0,2) -- (3,2) (1,0) -- (1,3) (2,0) -- (2,3);
+      \draw[very thick, black!85] (0,0) rectangle (3,3);
+      \draw[very thick, red!80!black] (0.18,2.18) -- (0.82,2.82) (0.18,2.82) -- (0.82,2.18);
+      \draw[very thick, red!80!black] (2.18,0.18) -- (2.82,0.82) (2.18,0.82) -- (2.82,0.18);
+      \draw[very thick, red!80!black] (0.18,0.18) -- (0.82,0.82) (0.18,0.82) -- (0.82,0.18);
+      \draw[very thick, blue!75!black] (1.5,1.5) circle (0.32);
+      \draw[very thick, blue!75!black] (1.5,2.5) circle (0.32);
+      \draw[dashed, red!75!black, thick] (0.5,2.85) -- (0.5,0.15);
+      \draw[dashed, red!75!black, thick] (0.15,0.5) -- (2.85,0.5);
+    \end{tikzpicture}
+    \caption{Corner-hinge fork at bottom-left.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.44\textwidth}
+    \centering
+    \begin{tikzpicture}[scale=0.82]
+      \fill[red!10] (1,0) rectangle (2,3);
+      \fill[red!10] (0,2) rectangle (1,3);
+      \fill[red!10] (1,1) rectangle (2,2);
+      \fill[red!10] (2,0) rectangle (3,1);
+      \draw[thick, black!75] (0,1) -- (3,1) (0,2) -- (3,2) (1,0) -- (1,3) (2,0) -- (2,3);
+      \draw[very thick, black!85] (0,0) rectangle (3,3);
+      \draw[very thick, red!80!black] (0.18,2.18) -- (0.82,2.82) (0.18,2.82) -- (0.82,2.18);
+      \draw[very thick, red!80!black] (1.18,2.18) -- (1.82,2.82) (1.18,2.82) -- (1.82,2.18);
+      \draw[very thick, red!80!black] (1.18,1.18) -- (1.82,1.82) (1.18,1.82) -- (1.82,1.18);
+      \draw[very thick, blue!75!black] (2.5,2.5) circle (0.32);
+      \draw[very thick, blue!75!black] (0.5,1.5) circle (0.32);
+      \draw[dashed, red!75!black, thick] (1.5,2.85) -- (1.5,0.15);
+      \draw[dashed, red!75!black, thick] (0.15,2.85) -- (2.85,0.15);
+    \end{tikzpicture}
+    \caption{Centre-hinge fork.}
+  \end{subfigure}
+  \caption{Two canonical forks for Player $A$. Each spans $3 + 3 - 1 = 5$ cells: three occupied by $\mathsf{X}$ (including the shared hinge) and two empty threat squares.}
+  \label{fig:2d_forks}
+\end{figure}
+
+Geometrically, a fork requires two winning lines intersecting at a single \emph{hinge} square (Figure~\ref{fig:2d_forks}). Across the $3 + 3 - 1 = 5$ squares belonging to these two lines, $3$ must be occupied by $A$ (with the hinge placed last) and $2$ must remain empty. At the moment $A$ completes this $3$-mark structure (on move $3$ or move $4$), $B$ has placed at least $2$ and at most $3$ marks on the board. For $B$ to force a draw, they simply need to prevent this $5$-square configuration from ever arising.
+
+\subsection{Casework on $A$'s Opening Move}
+By symmetry, there are three types of squares on a $3 \times 3$ grid: \textbf{corners}, \textbf{edges}, and the \textbf{centre}. We examine $B$'s response to each possible opening move by $A$:
+
+\begin{enumerate}
+    \item \textbf{Corner opening:} $B$ plays in the \textbf{centre}. As shown in Figure~\ref{fig:corner_defense}, the remaining open squares fall into three groups:
+    \begin{itemize}
+        \item \emph{Green squares (collinear with $A$'s corner):} Playing here creates an immediate $2$-in-a-row threat along an outer row or column, and $B$ simply blocks the third square in that same line.
+        \item \emph{Blue squares (non-collinear with $A$'s corner):} Wherever $A$ plays here, $B$ either directly blocks the newly formed threat or plays an edge square that simultaneously blocks and creates a counter-threat.
+        \item \emph{Opposite corner:} If $A$ plays the diagonally opposite corner, $B$ plays on any \textbf{edge}. This creates an immediate $2$-in-a-row threat that forces $A$ to defend rather than assemble a fork.
+    \end{itemize}
+    \item \textbf{Edge opening:} $B$ plays in the \textbf{centre}. No matter how $A$ responds, $B$ can directly block every threat or force defensive replies until the board fills.
+    \item \textbf{Centre opening:} $B$ plays in any \textbf{corner}. Every subsequent alignment attempt by $A$ is met with a direct block by $B$, neutralizing any potential fork.
+\end{enumerate}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[scale=0.92]
+    \fill[green!18] (1,2) rectangle (3,3);
+    \fill[green!18] (0,0) rectangle (1,2);
+    \fill[blue!18] (2,1) rectangle (3,2);
+    \fill[blue!18] (1,0) rectangle (2,1);
+    \fill[orange!22] (2,0) rectangle (3,1);
+    \draw[thick, black!75] (0,1) -- (3,1) (0,2) -- (3,2) (1,0) -- (1,3) (2,0) -- (2,3);
+    \draw[very thick, black!85] (0,0) rectangle (3,3);
+    \draw[very thick, red!80!black] (0.18,2.18) -- (0.82,2.82) (0.18,2.82) -- (0.82,2.18);
+    \draw[very thick, blue!75!black] (1.5,1.5) circle (0.32);
+    \node[font=\footnotesize\bfseries, green!45!black] at (1.5,2.5) {};
+    \node[font=\footnotesize\bfseries, green!45!black] at (2.5,2.5) {};
+    \node[font=\footnotesize\bfseries, green!45!black] at (0.5,1.5) {};
+    \node[font=\footnotesize\bfseries, green!45!black] at (0.5,0.5) {};
+    \node[font=\footnotesize\bfseries, blue!55!black] at (2.5,1.5) {};
+    \node[font=\footnotesize\bfseries, blue!55!black] at (1.5,0.5) {};
+    \node[font=\scriptsize\bfseries, orange!60!black, align=center] at (2.5,0.5) {};
+  \end{tikzpicture}
+  \caption{Defensive response after $A$ opens in a corner and $B$ claims the centre. Green squares lie on lines through $A$'s corner; blue squares do not; the opposite corner is met by an edge counter-threat.}
+  \label{fig:corner_defense}
+\end{figure}
+
+\subsection{Why This Works: Line Incidence}
+To see why $B$'s strategy succeeds, count how many winning lines pass through each square type (Figure~\ref{fig:line_counts}):
+\begin{enumerate}
+    \item \textbf{Corner:} $3$ lines (one row, one column, one diagonal).
+    \item \textbf{Edge:} $2$ lines (one row, one column).
+    \item \textbf{Centre:} $4$ lines (one row, one column, two diagonals).
+\end{enumerate}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.31\textwidth}
+    \centering
+    \begin{tikzpicture}[scale=0.72]
+      \fill[teal!15] (0,2) rectangle (1,3);
+      \draw[thick, black!75] (0,1) -- (3,1) (0,2) -- (3,2) (1,0) -- (1,3) (2,0) -- (2,3);
+      \draw[very thick, black!85] (0,0) rectangle (3,3);
+      \draw[very thick, teal!80!black] (0.5,2.5) -- (2.85,2.5);
+      \draw[very thick, teal!80!black] (0.5,2.5) -- (0.5,0.15);
+      \draw[very thick, teal!80!black] (0.5,2.5) -- (2.85,0.15);
+      \fill[teal!80!black] (0.5,2.5) circle (3.5pt);
+    \end{tikzpicture}
+    \caption{Corner: $3$ lines}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.31\textwidth}
+    \centering
+    \begin{tikzpicture}[scale=0.72]
+      \fill[teal!15] (1,2) rectangle (2,3);
+      \draw[thick, black!75] (0,1) -- (3,1) (0,2) -- (3,2) (1,0) -- (1,3) (2,0) -- (2,3);
+      \draw[very thick, black!85] (0,0) rectangle (3,3);
+      \draw[very thick, teal!80!black] (0.15,2.5) -- (2.85,2.5);
+      \draw[very thick, teal!80!black] (1.5,2.5) -- (1.5,0.15);
+      \fill[teal!80!black] (1.5,2.5) circle (3.5pt);
+    \end{tikzpicture}
+    \caption{Edge: $2$ lines}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.31\textwidth}
+    \centering
+    \begin{tikzpicture}[scale=0.72]
+      \fill[teal!15] (1,1) rectangle (2,2);
+      \draw[thick, black!75] (0,1) -- (3,1) (0,2) -- (3,2) (1,0) -- (1,3) (2,0) -- (2,3);
+      \draw[very thick, black!85] (0,0) rectangle (3,3);
+      \draw[very thick, teal!80!black] (0.15,1.5) -- (2.85,1.5);
+      \draw[very thick, teal!80!black] (1.5,0.15) -- (1.5,2.85);
+      \draw[very thick, teal!80!black] (0.15,0.15) -- (2.85,2.85);
+      \draw[very thick, teal!80!black] (0.15,2.85) -- (2.85,0.15);
+      \fill[teal!80!black] (1.5,1.5) circle (3.5pt);
+    \end{tikzpicture}
+    \caption{Centre: $4$ lines}
+  \end{subfigure}
+  \caption{Winning lines passing through each square type on a $3 \times 3$ board.}
+  \label{fig:line_counts}
+\end{figure}
+
+Placing $\mathsf{X}$ at a corner unlocks $3$ lines, and $B$'s reply in the centre immediately cuts off $1$ of those $3$ lines while seizing the $4$-line hub. To execute a fork, $A$ must place the hinge last at the intersection of at least $2$ open lines. Every square available to $A$ after $B$ claims the centre has at most $2$ open lines passing through it, giving $B$ enough tempo to block one of them before $A$ can complete a fork. The same bottleneck applies even more tightly when $A$ starts on a $2$-line edge.
+
+\section{3D Tic-Tac-Toe ($3 \times 3 \times 3$)}
+Moving the same game into three dimensions—a $3 \times 3 \times 3$ cube of $27$ cells—flips the outcome into a guaranteed win for Player $A$, with a straightforward constructive strategy:
+\begin{enumerate}
+    \item \textbf{Move 1:} $A$ places $\mathsf{X}$ in the \textbf{centre} $(2,2,2)$. The centre is collinear with every other cell on the board; pairing the remaining $26$ cells into antipodal endpoints around the centre shows that $26 / 2 = 13$ winning lines pass through it.
+    \item \textbf{Response 1:} $B$ places $\mathsf{O}$ in any other cell, blocking at most $1$ of the $13$ centre-lines and leaving at least $12$ completely unblocked.
+    \item \textbf{Move 2:} $A$ selects an unblocked centre-line and places the second $\mathsf{X}$ at one of its endpoints (preferably a corner, which lies on $7$ winning lines, though even an edge-centre—the lowest-connectivity cell in the cube—lies on $4$ winning lines: $1$ centre-line plus $3$ secondary lines). Because this creates an immediate $2$-in-a-row threat through the centre, $B$ is forced to block the opposite endpoint on their second move.
+    \item \textbf{Move 3 (The Fork):} Excluding the centre-line, the second $\mathsf{X}$ has at least $3$ secondary lines passing through it. Since $B$ has placed only two $\mathsf{O}$'s on the entire board, at least $2$ secondary lines through the second $\mathsf{X}$ remain completely free of $\mathsf{O}$. $A$ places the third $\mathsf{X}$ on an empty cell of one of those open secondary lines. Because \emph{every} non-centre cell also forms an unblocked line with the centre (its antipodal partner is still empty), this single move creates two simultaneous $2$-in-a-row threats: one along the secondary line and one through the centre.
+\end{enumerate}
+Because $B$ can block only one threat per turn, $A$ wins on move $4$. Thus, $3 \times 3 \times 3$ Tic-Tac-Toe is a guaranteed win for $A$.
+
+\section{The Hales--Jewett Theorem and Higher Dimensions}
+
+\subsection{Why Player $B$ Can Never Have a Winning Strategy}
+Before examining higher dimensions, it is worth noting why we never consider a winning strategy for Player $B$. For any $n^d$ board, this follows from \textbf{Nash's Strategy-Stealing Argument}:
+
+Suppose for contradiction that $B$ possessed a winning strategy. Player $A$ plays their first $\mathsf{X}$ anywhere on the board, and from then on pretends that $B$ is moving first on an otherwise empty board while $A$ plays as the second player using $B$'s winning strategy. Whenever that strategy instructs $A$ to place $\mathsf{X}$ on a square $A$ already occupies, $A$ simply places $\mathsf{X}$ on any other open square instead. In Tic-Tac-Toe, extra marks on the board can only help a player win and can never be a detriment. Hence $A$ would be guaranteed to win, contradicting the assumption that $B$ had a winning strategy. Every $n^d$ game must therefore be either a draw or a win for $A$.
+
+\subsection{The Hales--Jewett Theorem}
+In sufficiently high dimensions, draws disappear entirely, guaranteeing a win for Player $A$:
+
+\begin{theorem}[Hales--Jewett, 1963]
+For every line length $n \ge 1$ and every number of colours $c \ge 1$, there exists a minimum threshold dimension $HJ(n, c)$ such that for every dimension $d \ge HJ(n, c)$, any $c$-colouring of the hypercube $\{1, 2, \dots, n\}^d$ must contain at least one monochromatic combinatorial line of length $n$.
+\end{theorem}
+
+For two-player Tic-Tac-Toe ($c = 2$), once $d \ge HJ(n, 2)$, it is impossible to colour the entire board without producing $n$ consecutive cells of the same colour. Combined with strategy-stealing, Player $A$ is assured a forced win.
+
+\subsection{Geometrical Lines vs. Combinatorial Lines}
+To understand why $HJ(n, c)$ exists and how it relates to Tic-Tac-Toe, we distinguish between two types of lines in a $d$-dimensional hypercube $\{1, 2, \dots, n\}^d$:
+
+\begin{itemize}
+    \item \textbf{Geometrical Lines:} These are the straight lines you aim to complete in Tic-Tac-Toe. Parameterizing a line of $n$ points by $t \in \{1, 2, \dots, n\}$, each point has the form
+    \[
+    P(t) = \bigl(a_1(t),\, a_2(t),\, \dots,\, a_d(t)\bigr) \in \{1, 2, \dots, n\}^d,
+    \]
+    where at least one coordinate varies with $t$, and each coordinate function $a_i(t)$ is individually either \textbf{constant} ($a_i(t) = c_i$), \textbf{strictly increasing} ($a_i(t) = t$), or \textbf{strictly decreasing} ($a_i(t) = n + 1 - t$). For example, in a $3 \times 3 \times 3$ cube, the three cells $(1, 3, 2)$, $(2, 2, 2)$, and $(3, 1, 2)$ form a geometrical diagonal across the middle slice ($z = 2$): $a_1(t) = t$ increases, $a_2(t) = 4 - t$ decreases, and $a_3(t) = 2$ remains constant. There are $\frac{(n + 2)^d - n^d}{2}$ geometrical lines in $\{1, \dots, n\}^d$.
+
+    \item \textbf{Combinatorial Lines:} Combinatorial lines are defined using a \emph{variable word} (or \emph{wildcard tuple})
+    \[
+    w = (w_1, w_2, \dots, w_d) \in \bigl(\{1, 2, \dots, n\} \cup \{*\}\bigr)^d
+    \]
+    in which the wildcard symbol $*$ appears in at least one coordinate. Substituting $t = 1, 2, \dots, n$ simultaneously into every $*$ generates the line $\{w(1), w(2), \dots, w(n)\}$. Because every non-constant coordinate must equal $t$, active coordinates can only move in an \emph{increasing} manner in lockstep; decreasing coordinates are forbidden. Thus, anti-diagonals such as $(1,3), (2,2), (3,1)$ on a $3 \times 3$ board are geometrical lines but \textbf{not} combinatorial lines. There are $(n + 1)^d - n^d$ combinatorial lines in $\{1, \dots, n\}^d$.
+\end{itemize}
+
+Although the Hales--Jewett theorem is proved for combinatorial lines rather than geometrical lines, the set of geometrical lines is a strict superset of the combinatorial lines (for $d \ge 2, n \ge 2$). Consequently, the analogous geometric threshold dimension $HJ_{\mathrm{geom}}(n, c)$ always satisfies $HJ_{\mathrm{geom}}(n, c) \le HJ(n, c)$.
+
+\subsection{Computational Verification in $3 \times 3 \times 3$ and Monotonicity}
+In the $3 \times 3 \times 3$ cube, there are $49$ geometrical lines and $37$ combinatorial lines. Using a Python Boolean satisfiability (SAT) solver (available at \url{https://colab.research.google.com/drive/19WxN67aKqthGozfOnem2gmbXO08vpfFm?usp=sharing}), we tested all $2$-colourings of the cube:
+\begin{itemize}
+    \item \textbf{Geometrical lines ($49$ lines):} The solver proves there are \textbf{$0$ valid $2$-colourings} avoiding all geometrical lines (\texttt{UNSAT} in $0.003\,\mathrm{s}$), establishing $HJ_{\mathrm{geom}}(3, 2) = 3$.
+    \item \textbf{Combinatorial lines ($37$ lines):} Valid $2$-colourings avoiding all combinatorial lines \emph{do} exist in $3 \times 3 \times 3$ (specifically, $120$ valid colourings), and \texttt{UNSAT} is first reached at $d = 4$ ($81$ cells, $175$ lines), confirming $HJ(3, 2) = 4$.
+\end{itemize}
+This explains why $3 \times 3 \times 3$ Tic-Tac-Toe is already a forced win for $A$, even though $HJ(3, 2) = 4$.
+
+Furthermore, once the cutoff dimension is reached for either geometrical or combinatorial lines, the result never fluctuates in higher dimensions—it remains a guaranteed win for $A$ for all larger $d$. This is because a $d$-dimensional hypercube of side $n$ is built by stacking $n$ hypercubes of dimension $d - 1$. If a valid $c$-colouring existed in dimension $d$, restricting that colouring to any single $(d - 1)$-dimensional slice would yield a valid $c$-colouring in dimension $d - 1$, which is impossible once the threshold is passed.
+
+\subsection{Upper Bounds, Proof Idea, and Computational Growth}
+No closed-form formula is known for calculating $HJ(n, c)$. Beyond trivial cases ($HJ(1, c) = 1$ and $HJ(2, c) = c$), $HJ(3, 2) = 4$ is the only non-trivial value known exactly. In 1988, \textbf{Saharon Shelah} established the first primitive recursive upper bound for $HJ(n, c)$, though the bounds remain astronomical—even for $HJ(4, 2)$, known upper bounds remain enormous (exceeding $10^{11}$ and far beyond under general constructions).
+
+Shelah's 1988 proof proceeds by double induction over $n$ and $c$, constructing \emph{$r$-colour-focused families}: bundles of $r$ monochromatic combinatorial lines of length $n - 1$, in pairwise distinct colours, all converging on a single shared $n$-th endpoint. By showing that an $r$-colour-focused family must exist for every $r \le c$, the Pigeonhole Principle forces the shared endpoint to match one of the $c$ colours, completing a monochromatic line of length $n$. (The full inductive machinery is beyond the scope of this exposition.)
+
+\begin{table}[htbp]
+  \centering
+  \caption{SAT solver (Glucose 4) benchmark across line lengths $n \in \{3, 4, 5, 6, 7\}$ and dimensions $d$. Source code and full logs: \url{https://colab.research.google.com/drive/19WxN67aKqthGozfOnem2gmbXO08vpfFm?usp=sharing}.}
+  \label{tab:sat_benchmark}
+  \begin{tabular}{@{}clrrrrl@{}}
+    \toprule
+    $n$ & Line Mode & $d$ & Cells ($n^d$) & Lines & Runtime (s) & Solver Result \\
+    \midrule
+    $3$ & Geometrical   & $2$ & $9$     & $8$      & $0.001$   & \texttt{SAT} (valid colouring) \\
+    $3$ & Geometrical   & $3$ & $27$    & $49$     & $0.003$   & \texttt{UNSAT} ($HJ_{\mathrm{geom}}(3,2) = 3$) \\
+    $3$ & Combinatorial & $3$ & $27$    & $37$     & $0.001$   & \texttt{SAT} (valid colouring) \\
+    $3$ & Combinatorial & $4$ & $81$    & $175$    & $0.001$   & \texttt{UNSAT} ($HJ(3,2) = 4$) \\
+    \midrule
+    $4$ & Geometrical   & $4$ & $256$   & $520$    & $0.006$   & \texttt{SAT} (valid colouring) \\
+    $4$ & Geometrical   & $5$ & $1{,}024$  & $3{,}376$   & $>300.0$  & \texttt{TIMEOUT} ($HJ_{\mathrm{geom}}(4,2) \ge 5$) \\
+    $4$ & Combinatorial & $6$ & $4{,}096$  & $11{,}529$  & $0.143$   & \texttt{SAT} (valid colouring) \\
+    $4$ & Combinatorial & $7$ & $16{,}384$ & $61{,}741$  & $>399.8$  & \texttt{TIMEOUT} ($HJ(4,2) \ge 7$) \\
+    \midrule
+    $5$ & Geometrical   & $7$ & $78{,}125$ & $372{,}709$ & $18.219$  & \texttt{SAT} (cutoff at $d \ge 8$) \\
+    $6$ & Geometrical   & $6$ & $46{,}656$ & $107{,}744$ & $1.912$   & \texttt{SAT} (cutoff at $d \ge 7$) \\
+    $7$ & Geometrical   & $5$ & $16{,}807$ & $21{,}121$  & $0.397$   & \texttt{SAT} (cutoff at $d \ge 6$) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+As illustrated by the Python SAT benchmark in Table~\ref{tab:sat_benchmark} (see \url{https://colab.research.google.com/drive/19WxN67aKqthGozfOnem2gmbXO08vpfFm?usp=sharing}), the computational difficulty grows exponentially with dimension: while $n = 3$ is resolved in milliseconds, $n = 4$ hits an intractable wall once the state space reaches $2^{1024}$ colourings ($d = 5$ geometric) and $2^{16384}$ colourings ($d = 7$ combinatorial).
+
+\section{Larger Boards in 2D and 3D ($n \ge 4$)}
+
+\subsection{2D Boards: $4 \times 4$ and the Hales--Jewett Pairing Strategy ($n \ge 5$)}
+All standard 2D forms of Tic-Tac-Toe result in a draw under optimal play. On a $4 \times 4$ board ($16$ squares, $10$ winning lines), executing a fork requires $A$ to occupy $5$ squares across two intersecting lines ($4 + 4 - 1 = 7$ total squares, leaving $2$ empty threats). Because $4 \times 4$ is spacious enough for $B$ to build $3$-in-a-row counter-threats of their own, $A$ is repeatedly forced onto the defensive and never gets enough free tempo to construct a fork.
+
+For all boards of size $5 \times 5$ and larger, \textbf{Hales and Jewett} introduced an elegant pairing strategy in their very same 1963 paper. An $n \times n$ board has $2n + 2$ winning lines ($n$ rows, $n$ columns, and $2$ diagonals) and $\lfloor n^2 / 2 \rfloor$ disjoint pairs of squares. Starting at $n = 5$, we have
+\[
+2(5) + 2 = 12 \le \left\lfloor \frac{5^2}{2} \right\rfloor = 12,
+\]
+and for every $n \ge 6$, the number of available pairs strictly exceeds $2n + 2$.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[scale=0.78]
+    % Subtle tints: rows (blue!12), cols (green!12), diags (orange!16), centre (gray!15)
+    \fill[orange!18] (0,4) rectangle (1,5) (4,0) rectangle (5,1) (4,4) rectangle (5,5) (0,0) rectangle (1,1);
+    \fill[blue!12]   (1,4) rectangle (3,5) (0,3) rectangle (2,4) (1,2) rectangle (2,3) (3,2) rectangle (4,3) (3,1) rectangle (5,2) (2,0) rectangle (4,1);
+    \fill[green!12]  (3,3) rectangle (4,5) (2,1) rectangle (3,4) (4,2) rectangle (5,4) (0,1) rectangle (1,3) (1,0) rectangle (2,2);
+    \fill[black!10]  (2,2) rectangle (3,3);
+
+    \foreach \i in {1,2,3,4} {
+      \draw[thick, black!70] (0,\i) -- (5,\i);
+      \draw[thick, black!70] (\i,0) -- (\i,5);
+    }
+    \draw[very thick, black!85] (0,0) rectangle (5,5);
+
+    % Row 1 (top, y=4.5)
+    \node[font=\footnotesize\bfseries] at (0.5,4.5) {D1};
+    \node[font=\footnotesize\bfseries] at (1.5,4.5) {R1};
+    \node[font=\footnotesize\bfseries] at (2.5,4.5) {R1};
+    \node[font=\footnotesize\bfseries] at (3.5,4.5) {C4};
+    \node[font=\footnotesize\bfseries] at (4.5,4.5) {D2};
+    % Row 2 (y=3.5)
+    \node[font=\footnotesize\bfseries] at (0.5,3.5) {R2};
+    \node[font=\footnotesize\bfseries] at (1.5,3.5) {R2};
+    \node[font=\footnotesize\bfseries] at (2.5,3.5) {C3};
+    \node[font=\footnotesize\bfseries] at (3.5,3.5) {C4};
+    \node[font=\footnotesize\bfseries] at (4.5,3.5) {C5};
+    % Row 3 (y=2.5)
+    \node[font=\footnotesize\bfseries] at (0.5,2.5) {C1};
+    \node[font=\footnotesize\bfseries] at (1.5,2.5) {R3};
+    \node[font=\normalsize\bfseries] at (2.5,2.5) {$\ast$};
+    \node[font=\footnotesize\bfseries] at (3.5,2.5) {R3};
+    \node[font=\footnotesize\bfseries] at (4.5,2.5) {C5};
+    % Row 4 (y=1.5)
+    \node[font=\footnotesize\bfseries] at (0.5,1.5) {C1};
+    \node[font=\footnotesize\bfseries] at (1.5,1.5) {C2};
+    \node[font=\footnotesize\bfseries] at (2.5,1.5) {C3};
+    \node[font=\footnotesize\bfseries] at (3.5,1.5) {R4};
+    \node[font=\footnotesize\bfseries] at (4.5,1.5) {R4};
+    % Row 5 (bottom, y=0.5)
+    \node[font=\footnotesize\bfseries] at (0.5,0.5) {D2};
+    \node[font=\footnotesize\bfseries] at (1.5,0.5) {C2};
+    \node[font=\footnotesize\bfseries] at (2.5,0.5) {R5};
+    \node[font=\footnotesize\bfseries] at (3.5,0.5) {R5};
+    \node[font=\footnotesize\bfseries] at (4.5,0.5) {D1};
+  \end{tikzpicture}
+  \caption{Explicit Hales--Jewett pairing on a $5 \times 5$ board. Each of the $12$ winning lines (\texttt{R1}--\texttt{R5}, \texttt{C1}--\texttt{C5}, \texttt{D1}, \texttt{D2}) contains one dedicated pair of twin squares, leaving only the centre $\ast$ unpaired.}
+  \label{fig:pairing_5x5}
+\end{figure}
+
+\textbf{The Pairing Strategy:} Divide the $n \times n$ board into disjoint pairs of cells so that every winning line contains at least one dedicated pair whose two cells both lie on that line (as illustrated for $5 \times 5$ in Figure~\ref{fig:pairing_5x5}). Whenever Player $A$ plays in one cell of a pair, Player $B$ immediately plays $\mathsf{O}$ in its twin. By construction, $B$ places a blocking mark in every line $A$ attacks, guaranteeing a draw. If $A$ plays on an unpaired cell (such as the centre of an odd-sided board), $B$ simply claims any open square and continues.
+
+\subsection{3D $4 \times 4 \times 4$ (\emph{Qubic})}
+When $n = 4$ is extended into three dimensions ($64$ cells, $76$ winning lines), the advantage swings back to Player $A$, though the winning strategy becomes far more intricate. In 1980, \textbf{Oren Patashnik} proved with the help of a computer-assisted search that $4 \times 4 \times 4$ Tic-Tac-Toe (\emph{Qubic}) is a forced win for Player $A$. Unlike $3 \times 3 \times 3$, \emph{Qubic} has no single central cell—its inner $2 \times 2 \times 2$ core consists of $8$ cells of $7$ lines each. Instead of a quick $4$-move fork, $A$ wins by occupying high-connectivity core cells and initiating a long, forced chain of consecutive $3$-in-a-row threats, depriving $B$ of tempo until an unblockable double $3$-in-a-row fork emerges.
+
+\section{Three or More Players ($m \ge 3$)}
+Expanding the game along our third axis—to $m \ge 3$ players—alters the strategic landscape in three fundamental ways:
+
+\begin{itemize}
+    \item \textbf{Kingmaking and the Collapse of Strategy-Stealing:} With three or more players, Tic-Tac-Toe is no longer a two-player zero-sum game, and Nash's strategy-stealing argument breaks down. Opponents $B$ and $C$ can form temporary alliances against a player who is close to winning, or a player who has lost any chance of winning can act as a \textbf{kingmaker}—choosing which opponent to block and effectively deciding who wins the game. For $m \ge 3$, we therefore ask whether any player has a \emph{unilateral forced win}: a strategy that wins even if all other $m - 1$ players cooperate solely to stop them.
+
+    \item \textbf{The $m$-Fork Requirement:} In $2$-player Tic-Tac-Toe, a fork requires $2$ simultaneous threats because the opponent gets $1$ move to block. With $m$ players, the other $m - 1$ players make $m - 1$ moves between two consecutive turns of Player $A$. A unilateral forced win therefore requires an \textbf{$m$-fork}—at least $m$ simultaneous winning threats so that even if each opponent blocks a distinct threat, one winning line remains open.
+
+    \item \textbf{Behaviour Across Boards ($3 \times 3 \times 3$, $4 \times 4$, and Higher Dimensions):}
+    \begin{itemize}
+        \item \emph{$3$-player $3 \times 3 \times 3$:} Unlike the $2$-player version, $3$-player $3 \times 3 \times 3$ has \textbf{no unilateral forced win}. Each player receives only $9$ moves, drawn final boards exist easily, and whenever $A$ builds a $2$-threat fork, $B$ and $C$ have two moves between them to block both lines.
+        \item \emph{$3$-player $4 \times 4$:} On a $16$-square board, $A$ gets at most $6$ moves while $B$ and $C$ get $5$ moves each. Building a $3$-fork on a $4 \times 4$ grid requires three intersecting lines of length $4$, taking at least $6$--$7$ stones for $A$. By the time $A$ reaches even $5$ moves, $B$ and $C$ have already placed $8$--$10$ marks across the board, easily blocking every line and forcing a draw.
+        \item \emph{Higher dimensions ($d \ge HJ(n, m)$):} By the general Hales--Jewett theorem for $m$ colours, once the dimension reaches $HJ_{\mathrm{geom}}(n, m) \le HJ(n, m)$, a draw again becomes combinatorially impossible—some player is guaranteed to complete a line of length $n$, even though coalitions prevent a unilateral winner until the dimension is large enough to force an $m$-fork.
+    \end{itemize}
+\end{itemize}
+
+\section{Putting It All Together}
+Across all variants of Tic-Tac-Toe, the outcome of optimal play reflects a tug-of-war between our three parameters $(d, n, m)$:
+\begin{itemize}
+    \item Increasing the \textbf{dimension $d$} causes the number of winning lines $\frac{(n + 2)^d - n^d}{2}$ to grow exponentially faster than the board size $n^d$, creating high-connectivity hubs that guarantee a first-player win once $d \ge HJ_{\mathrm{geom}}(n, 2)$.
+    \item Increasing the \textbf{line length $n$} dilutes line density, allowing the second player to force a draw via counter-threats ($n = 4$ in 2D) or exact Hales--Jewett cell pairings ($n \ge 5$ in 2D).
+    \item Increasing the \textbf{number of players $m$} multiplies the number of opponent blocking moves per turn cycle ($m - 1$), raising the fork threshold from $2$ threats to $m$ threats and introducing coalition and kingmaking dynamics.
+\end{itemize}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Summary of optimal outcomes across dimensions $d$, line lengths $n$, and player counts $m$.}
+  \label{tab:summary_all}
+  \begin{tabular}{@{}lccl@{}}
+    \toprule
+    Board Variant $(n^d, m\text{ players})$ & Cells & Winning Lines & Optimal Outcome \& Mechanism \\
+    \midrule
+    $3 \times 3$, $2$ players & $9$ & $8$ & \textbf{Draw:} Centre/corner control prevents $2$-forks \\
+    $4 \times 4$, $2$ players & $16$ & $10$ & \textbf{Draw:} Counter-threats prevent $5$-move forks \\
+    $n \times n$ ($n \ge 5$), $2$ players & $n^2$ & $2n + 2$ & \textbf{Draw:} Hales--Jewett pairing covers all lines \\
+    $3 \times 3 \times 3$, $2$ players & $27$ & $49$ & \textbf{Player $A$ wins:} $13$-line centre forces fork by move $4$ \\
+    $4 \times 4 \times 4$, $2$ players & $64$ & $76$ & \textbf{Player $A$ wins:} Forced threat chains (Patashnik, 1980) \\
+    $3 \times 3 \times 3$, $3$ players & $27$ & $49$ & \textbf{Draw (no unilateral win):} $2$ opponents block $2$-forks \\
+    $4 \times 4$, $3$ players & $16$ & $10$ & \textbf{Draw:} $A$ gets only $6$ moves; opponents block early \\
+    $n^d$, $2$ players ($d \ge HJ(n, 2)$) & $n^d$ & $\frac{(n+2)^d - n^d}{2}$ & \textbf{Player $A$ wins:} Hales--Jewett + strategy-stealing \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\end{document}
